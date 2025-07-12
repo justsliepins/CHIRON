@@ -1,7 +1,8 @@
 from datetime import datetime, timezone
 class CostCalculator:
-    def __init__(self, price_model):
+    def __init__(self, price_model, degradation_model=None):
         self.price_model = price_model
+        self.degradation_model = degradation_model
 
     def get_electricity_cost(self, power_kw, time_seconds, timestamp):
         """
@@ -34,7 +35,25 @@ class CostCalculator:
         Returns:
             float: Ageing cost in euros (€).
         """
-        cost_rate = 0.10 #cost rate per hour at full soc
+        cost_rate = 0.10 
         time_hours = time_seconds / 3600
         cost = cost_rate * soc * time_hours
         return cost
+
+    def get_sei_degradation_cost(self, cycle_number):
+        """
+        Calculate the SEI (Solid Electrolyte Interphase) degradation cost for a given cycle.
+
+        This method uses the degradation model (if provided) to estimate the monetary cost
+        of SEI film growth at a specific battery cycle number. The cost typically decreases
+        with each subsequent cycle, modeled using an exponential decay function.
+
+        Args:
+            cycle_number (int): The current battery cycle number (starting from 1).
+
+        Returns:
+            float: Estimated SEI degradation cost in euros (€). Returns 0.0 if no degradation model is set.
+        """
+        if self.degradation_model:
+            return self.degradation_model.get_sei_cost(cycle_number)
+        return 0.0

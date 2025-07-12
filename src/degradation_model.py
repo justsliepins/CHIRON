@@ -19,3 +19,15 @@ class DegradationModel:
         """
         self.initial_cost = initial_cost
         self.decay_rate = decay_rate
+
+    def get_sei_cost(self, cycle_number):
+        """
+        Calculate SEI film degradation cost based on cycle number using exponential decay.
+
+        Args:
+            cycle_number (int): Current cycle number.
+
+        Returns:
+            float: Degradation cost in euros.
+        """
+        return self.initial_cost * math.exp(-self.decay_rate * (cycle_number - 1))
