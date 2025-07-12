@@ -1,5 +1,5 @@
 import csv
-from datetime import datetime
+from datetime import datetime, timezone
 from io import StringIO
 
 class PriceModel:
@@ -8,12 +8,20 @@ class PriceModel:
         Parses CSV price data into a dictionary mapping hour start timestamps to prices.
         Expects columns: ts_start, ts_end, price
         """
-        self.prices = {}
-        reader = csv.DictReader(StringIO(price_data_csv))
+        self.prices = []
+        csv_file = StringIO(price_data_csv)
+        reader = csv.DictReader(csv_file)
         for row in reader:
-            ts_start = datetime.strptime(row["ts_start"], "%Y-%m-%d %H:%M:%S")
-            price = float(row["price"])
-            self.prices[ts_start] = price
+            ts_start = datetime.fromisoformat(row['ts_start'])
+            if ts_start.tzinfo is None:
+                ts_start = ts_start.replace(tzinfo=timezone.utc)
+
+            ts_end = datetime.fromisoformat(row['ts_end'])
+            if ts_end.tzinfo is None:
+                ts_end = ts_end.replace(tzinfo=timezone.utc)
+
+            price = float(row['price'])
+            self.prices.append({'ts_start': ts_start, 'ts_end': ts_end, 'price': price})
 
     def get_price(self, timestamp):
         """
@@ -21,5 +29,10 @@ class PriceModel:
 
         Assumes exact hourly timestamps are keys, so rounds down query timestamp to hour.
         """
-        ts_hour = timestamp.replace(minute=0, second=0, microsecond=0)
-        return self.prices.get(ts_hour, None)
+        if timestamp.tzinfo is None:
+            timestamp = timestamp.replace(tzinfo=timezone.utc)
+
+        for entry in self.prices:
+            if entry['ts_start'] <= timestamp < entry['ts_end']:
+                return entry['price']
+        return None

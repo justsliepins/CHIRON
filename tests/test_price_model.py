@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from src.price_model import PriceModel
 
 def test_price_model_with_realistic_csv():
