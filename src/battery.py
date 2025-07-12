@@ -6,15 +6,16 @@ class Battery:
 
     def update_soc(self, power_kw, time_seconds):
         """
-        Updates the battery's state of charge (SOC) based on charging power and duration.
+        Updates the battery's state of charge (SOC) based on charging or discharging power and duration.
 
-        The method calculates the energy added in kilowatt-hours (kWh) using the 
+        The method calculates the energy change in kilowatt-hours (kWh) using the 
         formula: energy = power × time. It then updates the SOC accordingly, ensuring 
-        the value does not exceed 1.0 (100%).
+        the value is clamped between 0.0 (0%) and 1.0 (100%).
 
         Args:
-            power_kw (float): Charging power in kilowatts (kW).
-            time_seconds (float): Duration of charging in seconds.
+            power_kw (float): Charging or discharging power in kilowatts (kW). 
+            Use negative values for discharging.
+            time_seconds (float): Duration of energy transfer in seconds.
 
         Returns:
             None
@@ -27,3 +28,5 @@ class Battery:
 
         if self.current_soc > 1:
             self.current_soc = 1
+        if self.current_soc < 0:
+            self.current_soc = 0 
