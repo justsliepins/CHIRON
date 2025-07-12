@@ -15,3 +15,15 @@ def test_cost_calculator_electricity_cost():
 
     cost = cost_calculator.get_electricity_cost( power_kw, time_seconds, timestamp )
     assert abs(cost - 5.00) < 1e-6
+
+
+def test_calendar_ageing_cost():
+    cost_calculator = CostCalculator(price_model=None) 
+
+    soc = 0.90
+    time_seconds = 1800  # 30 minutes
+
+    expected_cost = 0.10 * soc * (time_seconds / 3600)  
+    cost = cost_calculator.get_calendar_ageing_cost(soc, time_seconds)
+
+    assert abs(cost - expected_cost) < 1e-6
