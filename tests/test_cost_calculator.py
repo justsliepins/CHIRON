@@ -1,5 +1,8 @@
 from datetime import datetime, timezone
 from src.price_model import PriceModel
+import math
+import numpy as np
+from src.degradation_model import DegradationModel  
 from src.cost_calculator import CostCalculator
 
 def test_cost_calculator_electricity_cost():
@@ -16,14 +19,16 @@ def test_cost_calculator_electricity_cost():
     cost = cost_calculator.get_electricity_cost( power_kw, time_seconds, timestamp )
     assert abs(cost - 5.00) < 1e-6
 
+def test_calendar_ageing_cost_interpolation():
+    cost_calculator = CostCalculator(price_model=None)
 
-def test_calendar_ageing_cost():
-    cost_calculator = CostCalculator(price_model=None) 
+    soc = 0.75  
+    time_seconds = 7200  
 
-    soc = 0.90
-    time_seconds = 1800  # 30 minutes
+    expected_rate = np.interp(soc, [0.0, 0.5, 1.0], [0.037, 0.092, 0.204])
+    expected_cost = expected_rate * (time_seconds / 3600)
 
-    expected_cost = 0.10 * soc * (time_seconds / 3600)  
     cost = cost_calculator.get_calendar_ageing_cost(soc, time_seconds)
+    assert math.isclose(cost, expected_cost, abs_tol=1e-3)
 
-    assert abs(cost - expected_cost) < 1e-6
+ 

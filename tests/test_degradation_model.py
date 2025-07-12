@@ -1,4 +1,5 @@
 import math
+import numpy as np
 from src.degradation_model import DegradationModel
 from src.cost_calculator import CostCalculator
 from src.price_model import PriceModel

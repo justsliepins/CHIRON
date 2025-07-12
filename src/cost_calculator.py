@@ -1,4 +1,7 @@
 from datetime import datetime, timezone
+import math
+import numpy as np
+
 class CostCalculator:
     def __init__(self, price_model, degradation_model=None):
         self.price_model = price_model
@@ -22,23 +25,26 @@ class CostCalculator:
         cost = energy_kwh * price_per_kwh
         return cost
 
-    def get_calendar_ageing_cost(self, soc, time_seconds):
+    def get_calendar_ageing_cost(self, soc: float, time_seconds: float) -> float:
         """
-        Calculates the calendar ageing cost based on SOC and elapsed time.
-
-        Assumes a simple linear ageing cost rate of €0.10 per hour at 100% SOC.
+        Calculates calendar ageing cost based on SOC and time using piecewise
+        linear interpolation on data from (You et al., 2024). Based on asumption
+        that a 20% loss costs €8,000
 
         Args:
-            soc (float): State of charge (0 to 1).
-            time_seconds (float): Duration in seconds.
+            soc (float): State of Charge (0 to 1).
+            time_seconds (float): Time duration in seconds.
 
         Returns:
-            float: Ageing cost in euros (€).
+            float: Calendar ageing cost in euros (€).
         """
-        cost_rate = 0.10 
-        time_hours = time_seconds / 3600
-        cost = cost_rate * soc * time_hours
-        return cost
+        soc_points = [0.0, 0.5, 1.0] # TODO: get more soc points
+        cost_rates = [0.037, 0.092, 0.204]
+
+        current_rate = np.interp(soc, soc_points, cost_rates)
+
+        hours = time_seconds / 3600
+        return current_rate * hours
 
     def get_sei_degradation_cost(self, cycle_number):
         """
