@@ -1,0 +1,23 @@
+# azure-pipelines.yml
+
+# 🚀 Trigger builds on pushes to GitHub main branch
+trigger:
+  branches:
+    include:
+      - main
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+  - task: Checkout@1
+    displayName: 'Checkout GitHub repository'
+
+  - script: echo "🎉 CHIRON build triggered by GitHub push!"
+    displayName: 'Print Hello'
+
+  - script: |
+      echo "🔧 Add build/test steps here"
+      echo "🧠 Connected to GitHub main branch"
+    displayName: 'Placeholder script'
+
