@@ -22,8 +22,10 @@ class SmartChargingEnv(gym.Env):
         high = np.array([1.0, 95])             # SOC max 1.0, time index max 95 (15-min steps over 24h)
 
         self.observation_space = spaces.Box(low=low, high=high, dtype=np.float32)
+        self.initial_soc = 0.5
+        self.current_time_step = 0
 
-        battery = Battery(capacity_kwh=46.0, initial_soc=0.5)
+        battery = Battery(capacity_kwh=46.0, initial_soc=self.initial_soc)
 
         # Dummy electricity price profile for 96 timesteps (15-minute intervals in 24 hours)
         start_time = datetime(2024, 1, 1, 0, 0)
@@ -52,7 +54,12 @@ class SmartChargingEnv(gym.Env):
         pass
 
     def reset(self, seed=None, options=None):
-        pass
+        self.current_time_step = 0
+        self.engine.battery.soc = self.initial_soc
+
+        observation = np.array([self.engine.battery.soc, self.current_time_step], dtype=np.float32)
+        return observation, {}
+
 
     def render(self):
         pass
