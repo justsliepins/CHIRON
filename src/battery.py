@@ -1,8 +1,8 @@
 class Battery:
 
-    def __init__(self, capacity_kwh, current_soc):
+    def __init__(self, capacity_kwh, initial_soc = 0.0):
         self.capacity_kwh = capacity_kwh
-        self.current_soc = current_soc
+        self.soc = initial_soc
 
     def update_soc(self, power_kw, time_seconds):
         """
@@ -20,13 +20,7 @@ class Battery:
         Returns:
             None
         """
-        one_hour_in_seconds = 3600
-        time_hours = time_seconds / one_hour_in_seconds
+        time_hours = time_seconds / 3600
         energy_added = power_kw * time_hours
         soc_change = energy_added / self.capacity_kwh
-        self.current_soc += soc_change
-
-        if self.current_soc > 1:
-            self.current_soc = 1
-        if self.current_soc < 0:
-            self.current_soc = 0 
+        self.soc = min(max(self.soc + soc_change, 0.0), 1.0)
