@@ -24,3 +24,17 @@ def test_cost_calculator_includes_sei_degradation():
 
     assert sei_cost_1 > sei_cost_200
 
+def test_cyclic_ageing_cost():
+    degradation_model = DegradationModel()
+    calculator = CostCalculator(price_model=None, degradation_model=degradation_model)
+
+    battery_capacity_kwh = 46
+    c_rate = 1.25
+    cycle_portion = 0.10
+    power_kw = c_rate * battery_capacity_kwh
+    time_seconds = (cycle_portion * battery_capacity_kwh) / power_kw * 3600  
+
+    cost = calculator.get_cyclic_ageing_cost(power_kw, time_seconds, battery_capacity_kwh)
+
+    expected_cost = 0.30  
+    assert abs(cost - expected_cost) < 1e-6

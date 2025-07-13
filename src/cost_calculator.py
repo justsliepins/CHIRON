@@ -63,3 +63,26 @@ class CostCalculator:
         if self.degradation_model:
             return self.degradation_model.get_sei_cost(cycle_number)
         return 0.0
+
+    def get_cyclic_ageing_cost(self, power_kw: float, time_seconds: float, battery_capacity_kwh: float) -> float:
+        """
+        Calculate cyclic ageing cost for a charging event.
+
+        Args:
+            power_kw (float): Power during charging in kW.
+            time_seconds (float): Duration in seconds.
+            battery_capacity_kwh (float): Total battery capacity in kWh.
+
+        Returns:
+            float: Cyclic ageing cost in euros.
+        """
+        if not self.degradation_model:
+            return 0.0
+        
+        c_rate = power_kw / battery_capacity_kwh
+
+        time_hours = time_seconds / 3600
+        energy_added_kwh = power_kw * time_hours
+        cycle_portion = energy_added_kwh / battery_capacity_kwh
+
+        return self.degradation_model.get_cyclic_cost(c_rate, cycle_portion)
