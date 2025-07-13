@@ -27,3 +27,31 @@ def test_env_reset():
     assert env.current_time_step == 0, "Current time step not reset"
     assert env.engine.battery.soc == env.initial_soc, "Battery SOC not reset"
     assert info == {}, "Info dict should be empty"
+
+def test_env_step():
+    env = SmartChargingEnv()
+    observation, _ = env.reset()  
+
+    # Check initial observation values
+    assert np.allclose(observation, [0.5, 0])
+
+    action = 6  # highest charging power index
+
+    obs, reward, terminated, truncated, info = env.step(action)
+
+    assert isinstance(obs, np.ndarray)
+    assert obs.shape == (2,)
+    assert obs[1] == 1  # timestep incremented by 1
+
+    # Reward should be a float (negative cost)
+    assert isinstance(reward, float)
+    assert reward <= 0  # cost is positive, so reward is negative or zero
+
+    # Episode should not be terminated after 1 step
+    assert terminated is False
+
+    # Truncated should be False as per your design
+    assert truncated is False
+
+    # Info dictionary should be empty
+    assert info == {}

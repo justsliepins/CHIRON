@@ -24,6 +24,8 @@ class SmartChargingEnv(gym.Env):
         self.observation_space = spaces.Box(low=low, high=high, dtype=np.float32)
         self.initial_soc = 0.5
         self.current_time_step = 0
+        self.action_to_power = [-6, -4, -2, 0, 2, 4, 6]
+        self.max_steps = 96 
 
         battery = Battery(capacity_kwh=46.0, initial_soc=self.initial_soc)
 
@@ -47,11 +49,32 @@ class SmartChargingEnv(gym.Env):
             price_model=price_model,
             degradation_model=degradation_model
         )
-
         self.engine = SimulationEngine(battery=battery, cost_calculator=cost_calculator)
 
     def step(self, action):
-        pass
+        power_kw = self.action_to_power[action]
+
+        time_seconds = 15 * 60  # 15 minutes
+        base_time = datetime(2024, 1, 1, 0, 0)
+        current_timestamp = base_time + timedelta(minutes=15 * self.current_time_step)
+        cycle_number = 1
+
+        result = self.engine.run_step(power_kw, time_seconds, current_timestamp, cycle_number)
+
+        new_soc = result['new_soc']
+        total_cost = result['total_cost']
+        reward = -total_cost
+
+        self.current_time_step += 1
+
+        terminated = self.current_time_step >= self.max_steps
+        truncated = False
+
+        observation = np.array([new_soc, self.current_time_step], dtype=np.float32)
+
+        info = {}
+
+        return observation, reward, terminated, truncated, info
 
     def reset(self, seed=None, options=None):
         self.current_time_step = 0
