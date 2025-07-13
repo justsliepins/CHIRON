@@ -1,8 +1,8 @@
 from datetime import datetime
 from src.battery import Battery
-from src.degradation_model import DegradationModel
+from src.Models.degradation_model import DegradationModel
 from src.cost_calculator import CostCalculator
-from src.price_model import PriceModel
+from src.Models.price_model import PriceModel
 from src.simulation_engine import SimulationEngine
 
 def test_sim_stem():
