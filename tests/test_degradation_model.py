@@ -1,8 +1,8 @@
 import math
 import numpy as np
-from src.degradation_model import DegradationModel
+from src.Models.degradation_model import DegradationModel
 from src.cost_calculator import CostCalculator
-from src.price_model import PriceModel
+from src.Models.price_model import PriceModel
 
 def test_sei_cost_decreases_with_cycle_number():
     degradation_model = DegradationModel(initial_cost=6.088, decay_rate=0.013)

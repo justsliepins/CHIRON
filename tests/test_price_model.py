@@ -1,5 +1,5 @@
 from datetime import datetime, timezone
-from src.price_model import PriceModel
+from src.Models.price_model import PriceModel
 
 def test_price_model_with_realistic_csv():
     csv_data = """ts_start,ts_end,price

@@ -1,8 +1,8 @@
 from datetime import datetime, timezone
-from src.price_model import PriceModel
+from src.Models.price_model import PriceModel
 import math
 import numpy as np
-from src.degradation_model import DegradationModel  
+from src.Models.degradation_model import DegradationModel  
 from src.cost_calculator import CostCalculator
 
 def test_cost_calculator_electricity_cost():
