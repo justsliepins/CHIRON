@@ -23,6 +23,7 @@ class SmartChargingEnv(gym.Env):
 
         self.observation_space = spaces.Box(low=low, high=high, dtype=np.float32)
         self.initial_soc = 0.5
+        self.target_soc = 0.9
         self.current_time_step = 0
         self.action_to_power = [-6, -4, -2, 0, 2, 4, 6]
         self.max_steps = 96 
@@ -54,24 +55,30 @@ class SmartChargingEnv(gym.Env):
     def step(self, action):
         power_kw = self.action_to_power[action]
 
-        time_seconds = 15 * 60  # 15 minutes
-        base_time = datetime(2024, 1, 1, 0, 0)
-        current_timestamp = base_time + timedelta(minutes=15 * self.current_time_step)
+        # Use timestamp if needed by pricing
+        current_timestamp = datetime(2024, 1, 1) + timedelta(minutes=15 * self.current_time_step)
         cycle_number = 1
 
-        result = self.engine.run_step(power_kw, time_seconds, current_timestamp, cycle_number)
-
+        # Run simulation step
+        result = self.engine.run_step(power_kw, 15 * 60, current_timestamp, cycle_number)
         new_soc = result['new_soc']
         total_cost = result['total_cost']
+
+        # Basic reward = negative cost
         reward = -total_cost
 
+        # Advance time
         self.current_time_step += 1
 
         terminated = self.current_time_step >= self.max_steps
         truncated = False
 
-        observation = np.array([new_soc, self.current_time_step], dtype=np.float32)
+        if terminated:
+            soc_error = abs(new_soc - self.target_soc)
+            penalty = soc_error * 50  # You can tune this multiplier
+            reward -= penalty  # Larger penalty if final SOC is too far from target
 
+        observation = np.array([new_soc, self.current_time_step], dtype=np.float32)
         info = {}
 
         return observation, reward, terminated, truncated, info
